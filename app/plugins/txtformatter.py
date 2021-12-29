@@ -23,7 +23,7 @@ class TxtFormat(object):
         text = re.sub(r'(^[A-H])([\)\.、）])', r'\1)', text, flags=re.MULTILINE)
 
         # n. xxx => [题目]n) xxx n、xxx => [题目]n) xxx n) xxx => [题目]n) xxx
-        text = re.sub(r'(^[0-9]+)([\)\.、）])', r'[题目]\n\1)', text, flags=re.MULTIPLE)
+        text = re.sub(r'(^[0-9]+)([\)\.、）])', r'[题目]\n\1)', text, flags=re.MULTILINE)
         text = re.sub(r'(^[{\[]explain[}\]])', r'[解析]', text, flags=re.MULTILINE)
         return text
     def process(self, text):
