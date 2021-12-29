@@ -1,0 +1,47 @@
+一、单选题
+[题目]以下选项中合法的C语言赋值语句是：
+[选项]
+A)a=b=34
+B)++i;
+C)k=int( a+b );
+D)a=3,b=9
+[答案]B
+[解析]作者：小U资讯 https://www.bilibili.com/read/cv4920593 出处：bilibili
+
+
+[题目]有以下程序段，其中的变量已定义为int类型
+	<html>
+		<body>
+			<h1>hello</h1》
+		</body>
+	</html>
+程序段的输出结果是
+[选项]
+A)4
+B)7
+C)6
+D)5
+[答案]D
+[解析]作者：小U资讯 https://www.bilibili.com/read/cv4920593 出处：bilibili
+
+二、多选题
+[题目]有以下程序
+    main()
+    {
+        int
+        a = 2, c = 5;
+        printf("a=%%d,b=%%d\n", a, c);
+    }
+程序运行后的输出结果是
+[选项]
+A)a=%d,b=%d
+B)a=%%d,b=%%d
+C)a=2,b=5
+D)a=%2,b=%5
+[答案]AB
+[解析]作者：小U资讯 https://www.bilibili.com/read/cv4920593 出处：bilibili
+
+三、判断题
+[题目]<!-- This is a comment line -->是JavaScript的注释语句。
+[答案]FALSE
+[解析]这个是html的注释语句，不是JavaScript的

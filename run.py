@@ -1,3 +1,5 @@
-from app.main import test
+import os
+from app.main import main
 
-test()
+fn = os.path.join(os.path.dirname(__file__), "docs\\t1.txt")
+main(fn)

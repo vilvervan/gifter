@@ -10,8 +10,20 @@ def test():
     print(processed)
 
 
-def main():
-    r = "data"
+def main(fullfilename):
+    """
+    开始进行文件转换
+    :param fullfilename:文件全路径名
+    :return:
+    """
+    count = 0
+    with open(fullfilename,'r',encoding='utf-8') as fp:
+        file_content = fp.read()
+        processor = TextProcessor()
+        # print(processor.PLUGINS)
+        processed = processor.process(file_content)
+        print(processed)
+
 
 
 if __name__ == '__main__':
