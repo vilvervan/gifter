@@ -1,13 +1,10 @@
+import sys
 import os
 import logging
 from .platform import TextProcessor
 
-
-def test():
-    processor = TextProcessor()
-    print(processor.PLUGINS)
-    processed = processor.process(text="<html><head></head><body><h1>GeeksForGeeks</h1></body></html>")
-    print(processed)
+from pathlib import Path
+print('Running' if __name__ == '__main__' else 'Importing', Path(__file__).resolve())
 
 
 def main(fullfilename):
@@ -16,14 +13,17 @@ def main(fullfilename):
     :param fullfilename:文件全路径名
     :return:
     """
-    count = 0
+
+    if not os.path.exists(fullfilename):
+        print("Oops,file doesn't exist!")
+        return
+
     with open(fullfilename,'r',encoding='utf-8') as fp:
         file_content = fp.read()
         processor = TextProcessor()
-        # print(processor.PLUGINS)
         processed = processor.process(file_content)
         print(processed)
-
+        return processed
 
 
 if __name__ == '__main__':

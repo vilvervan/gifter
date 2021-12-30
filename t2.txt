@@ -12,9 +12,8 @@ B、Echo Request
 C、Echo Reply
 D、Port Unreachable
 
-
 多选题
-2、以下哪项不是CSMA/CD的工作原理？(  )(C)
+2、以下哪项不是CSMA/CD的工作原理？(  )(BD)
 A、边发边听
 B、延迟固定时间后重发
 C、冲突停发

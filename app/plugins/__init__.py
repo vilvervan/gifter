@@ -1,1 +1,1 @@
-__all__ = ['htmlformatter','giftformatter']
+__all__ = ['txtformatter', 'htmlformatter', 'giftformatter']

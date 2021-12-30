@@ -5,26 +5,40 @@ from ..platform import TextProcessor
 class TxtFormat(object):
     """
     对试题文本进行标准化处理
-    """
-    def begin(self,text_lines):
-        text = ''
-        for line in text_lines:
-            # A) 或 A.  A、 => A)
-            if re.search(r'^[A-H][\)\.、）]', line) is not None:
-                text += re.sub(r'(^[A-H])([\)\.、）])', r'\1)', line)
-            # n. xxx => [题目]n) xxx n、xxx => [题目]n) xxx n) xxx => [题目]n) xxx
-            elif re.search(r'^[0-9]+[\)\.、）]', line) is not None:
-                text += re.sub(r'(^[0-9]+)([\)\.、）])', r'[题目]\n\1)', line)
-            else:
-                text += line
-        return text
-    def transform(self,text):
-        # A) 或 A.  A、 => A)
-        text = re.sub(r'(^[A-H])([\)\.、）])', r'\1)', text, flags=re.MULTILINE)
+    试题文本格式要求：
 
-        # n. xxx => [题目]n) xxx n、xxx => [题目]n) xxx n) xxx => [题目]n) xxx
+    选择题
+    1、题干(答案)
+    A、选项
+    B、选项
+    [Explanation:]题目解析内容
+
+    判断题
+    1、题干(答案)
+    [Explanation:]题目解析内容
+
+    、  也可以是.或者全角）
+    :   半角冒号
+    题型名称包括：选择题（或单选题，同一个意思）、多选题、判断题
+    """
+    def transform(self,text):
         text = re.sub(r'(^[0-9]+)([\)\.、）])', r'[题目]\n\1)', text, flags=re.MULTILINE)
-        text = re.sub(r'(^[{\[]explain[}\]])', r'[解析]', text, flags=re.MULTILINE)
-        return text
+        text = re.sub(r'(^[A-H])([\)\.、）])', r'\1)', text, flags=re.MULTILINE)
+        text = re.sub(r'(^[A][\)])', r'[选项]\1', text, flags=re.MULTILINE)
+        text = re.sub(r'(^\[Explanation:\])', r'[解析]', text, flags=re.MULTILINE)
+        text = re.sub(r'\n{2,}([\[题目\]\[选择题\]\[单选题\]\[判断题\]\[多选题\]])', r'\n\n\n\1', text, flags=re.MULTILINE)
+
+        lines = re.split(r'\n\n\n', text)
+
+        r = ''
+        for line in lines:
+            if re.search(r'\[解析\]', line, flags=re.MULTILINE):
+                r += re.sub(r'\(([A-H]+)\)([\s\S]*)(\[解析\])', r'\2[答案]\1\n\3', line, re.MULTILINE)
+            else:
+                r += re.sub(r'\(([A-H]+)\)([\s\S]*)', r'\2\n[答案]\1', line, re.MULTILINE)
+            r += '\n\n'
+
+        print(r)
+        return r
     def process(self, text):
-        return html.escape(text)
+        return self.transform(text)
