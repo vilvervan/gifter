@@ -1,4 +1,4 @@
-# Moodle习题gifg格式批量转换工具
+# Moodle习题gift格式批量转换工具
 
 ## 介绍
 Giften是一个批量将试题转换为gift格式的工具，支持功能：
