@@ -6,43 +6,26 @@ from ..platform import TextProcessor
 
 @TextProcessor.plugin_register("giftFormatter")
 class GiftFormat(object):
+    """
+    本插件用于将标准格式的习题文本转换为gift格式文本。
+    标准格式文本如下：
+
+    CATEGORY:习题库/第22章 了解广域网接入技术
+    ###
+    单选题
+    ###
+    [题目]
+    1)传输距离长，传输容量大，一般采用(  )线缆进行传输。
+    [选项]
+    A)双绞线
+    B)同轴电缆
+    C)光纤
+    D)电话线
+    [答案]C
+    ###
+    """
     category = ["选择题", "单选题", "多选题", "判断题"]
     lines = []
-
-    def get_next_question(self, start_index):
-        """
-        获取下一道选择题
-        :param start_index: 开始行号(不包括“选择题”题目)
-        :return: ｛index:下一道选择题的行号,value: 检索到的下一道选择题的全部文本，count:下一道选择题所占行数}
-        """
-        q = {'index': start_index, 'value': '', 'line_count': 0}
-        i = start_index
-        first = False
-        for line in self.lines[i:]:
-            q['line_count'] += 1
-            if len(line.strip()) == 0:
-                continue
-
-            # 遇到下一个题型
-            if any(ext in line for ext in self.category):
-                q['line_count'] -= 1
-                break
-
-            # 遇到下一个题库
-            if re.search(r'^CATEGORY:', line):
-                q['line_count'] -= 1
-                break
-
-            # 遇到下一道题
-            if '[题目]' in line:
-                if first is False:
-                    first = True
-                else:
-                    q['line_count'] -= 1
-                    break
-
-            q['value'] += line + '\n'
-        return q
 
     def get_answer(self,question_txt):
         an = re.search(r'^\[答案\](.*)', question_txt, flags=re.MULTILINE)
@@ -54,7 +37,7 @@ class GiftFormat(object):
         :return (gift格式选择题的解析部分
         """
         ex = re.search(r'\[解析\]([\s\S]*)', question_txt)
-        ex = '' if not ex else re.sub(r'^\[解析\]', '####', ex[0])
+        ex = '' if not ex else re.sub(r'^\[解析\]', '####', ex[0]) + '\n'
         return ex
 
     def get_topic(self,cat,question_txt):
@@ -72,7 +55,7 @@ class GiftFormat(object):
             pattern = r'^\[题目\]\n\d+\)([\s\S]*)\[答案\]'
 
         tp = re.search(pattern, question_txt, flags=re.MULTILINE)
-        print(question_txt)
+
         tp = "::" + cat + "::" + tp[1].strip()
 
         return tp
@@ -83,7 +66,7 @@ class GiftFormat(object):
         :param ques: 题目完整的文本内容
         :return: gift格式的选择项（带答案）
         """
-        ch = re.search('\[选项\]([\s\S]*)\[答案\]', question_txt)[1]
+        ch = re.search(r'\[选项\]([\s\S]*)\[答案\]', question_txt, flags=re.MULTILINE)[1]
 
         # 处理答案 X) => =
         an = self.get_answer(question_txt).strip()
@@ -101,56 +84,34 @@ class GiftFormat(object):
         :return: 一道题的gift格式内容
         """
         gft = ''
-        gft += self.get_topic(cat, ques).rstrip() + "{\n"
+        gft += self.get_topic(cat, ques).rstrip() + "{"
         if cat == '选择题' or cat == '多选题' or cat == '单选题':
             gft += self.get_choices(ques)
-        if cat == '判断题':
-            gft += self.get_answer(ques)
+        elif cat == '判断题':
+            gft += 'True' if self.get_answer(ques) == 'A' else 'False'
+        else:
+            print("unknown question type:" + ques)
+            return
+
         gft += self.get_explain(ques)
         gft += "}\n"
         return gft
 
-    def handle_type(self,index,cat):
-        """
-        批量转换某种题型
-        :param index:该题型题目开始的行号
-        :param cat: 题型名称
-        :return: 该题型所有题目的gift格式文本
-        """
-        idx = index
-        gift_ques = ""
-        tmp = self.get_next_question(idx)
-        while tmp['line_count'] > 0:
-            gift_ques += self.parse_ques(cat, tmp['value']) + '\n'
-            idx = tmp['index'] + tmp['line_count']
-            tmp = self.get_next_question(idx)
-        return gift_ques, idx
-
     def parse_category(self,cat):
         return re.sub(r'^CATEGORY:(.*) ', r'$CATEGORY: $course$/\1', cat)
 
-    def to_gift(self, text_lines):
-        """标准文件转换为gift格式文本
-        :param text_lines: 待转换的标准试题文本列表，一个元素表示一行试题文本
-        :return: gift格式试题文本内容,下一大题的开始行号
-        """
-        self.lines = text_lines
+    def giften(self,questions):
+        self.lines = questions
         gift_result = ""
-        i = 0
-        while i < len(text_lines):
-            line = text_lines[i]
-
-            ct = [ele for ele in self.category if ele in line]
-            if len(ct) > 0:
-                rt = self.handle_type(i + 1, ct[0])
-                gift_result += rt[0] + '\n'
-                i = rt[1]
-                continue
-
-            if re.search(r'^CATEGORY:', line):
+        cat = ''
+        for line in questions:
+            line = line.strip()
+            if re.search(r'^CATEGORY:', line): # 内容为题库信息
                 gift_result += self.parse_category(line) + '\n' + '\n'
-
-            i += 1
+            elif line in self.category: # 内容为题型信息
+                cat = line
+            elif re.search(r'^\[题目\]', line): # 内容为题目
+                gift_result += self.parse_ques(cat, line) + '\n'
 
         return gift_result
 
@@ -160,4 +121,6 @@ class GiftFormat(object):
         :param text: 试题列表，每个列表元素一行
         :return: gift格式试题
         """
-        return self.to_gift(text.split("\n"))
+        # return self.to_gift(text.split("\n"))
+        return self.giften(text.split("###"))
+        # return text

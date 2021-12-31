@@ -22,7 +22,7 @@ def main(fullfilename):
         file_content = fp.read()
         processor = TextProcessor()
         processed = processor.process(file_content)
-        print(processed)
+        # print(processed)
         return processed
 
 

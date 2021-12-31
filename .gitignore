@@ -1,0 +1,6 @@
+.idea/
+target/
+gift/
+*.log
+*.temp
+/vendor
